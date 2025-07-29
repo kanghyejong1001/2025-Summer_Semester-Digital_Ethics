@@ -185,7 +185,7 @@ def simulation():
     else:
         col1, col2 = st.columns([1, 1])
         with col1:
-            st.image(row['image'], width=220, caption=f"사진 {idx + 1} / {total_images}")
+            st.image(st.session_state.row['image'], width=220, caption=f"사진 {idx + 1} / {total_images}")
 
         with col2:
             choice = st.radio("이 이미지는 어떤가요?", ["Real", "Fake"], key=idx)
@@ -197,7 +197,7 @@ def simulation():
                     st.session_state.current_index += 1
                     st.session_state.answer_given = False
                     st.session_state.result_button = False
-                    row = combined.loc[idx]
+                    st.session_state.row = combined.loc[idx]
 
             st.rerun()
 
