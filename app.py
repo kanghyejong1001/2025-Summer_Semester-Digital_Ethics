@@ -168,9 +168,7 @@ def simulation():
         st.session_state.total = 0
         st.session_state.answer_given = False
         st.session_state.result_button = False
-    if 'image' not in st.session_state:
-        st.session_state.image = True
-        
+
     idx = st.session_state.current_index
     if idx >= total_images:
         st.success(f"🎉 게임 종료! 최종 점수: {st.session_state.score}/{st.session_state.total}")
@@ -187,21 +185,19 @@ def simulation():
         row = combined.loc[idx]
         col1, col2 = st.columns([1, 1])
         with col1:
-            if st.session_state.image:
-                st.image(row['image'], width=220, caption=f"사진 {idx + 1} / {total_images}")
-                st.session_state.image = False
+            st.image(row['image'], width=220, caption=f"사진 {idx + 1} / {total_images}")
 
         with col2:
             choice = st.radio("이 이미지는 어떤가요?", ["Real", "Fake"], key=idx)
             if not st.session_state.answer_given:
                 if st.button("✅ 정답 확인"):
                     st.session_state.result_button = True
+                    st.rerun()
             else:
                 if st.button("➡️ 다음 문제"):
                     st.session_state.current_index += 1
                     st.session_state.answer_given = False
                     st.session_state.result_button = False
-                    st.session_state.image = True
                     st.rerun()
 
             if st.session_state.result_button:
