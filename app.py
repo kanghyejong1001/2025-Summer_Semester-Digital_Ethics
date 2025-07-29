@@ -189,6 +189,7 @@ def simulation():
         with col2:
             choice = st.radio("이 이미지는 어떤가요?", ["Real", "Fake"], key=idx)
             if st.button("✅ 정답 확인"):
+                st.experimental_rerun()
                 if choice == row['label']:
                     st.success("🎯 정답입니다!")
                     st.session_state.score += 1
@@ -199,6 +200,7 @@ def simulation():
 
             if st.session_state.answer_given:
                 if st.button("➡️ 다음 문제"):
+                    st.experimental_rerun()
                     st.session_state.current_index += 1
                     st.session_state.answer_given = False
 
