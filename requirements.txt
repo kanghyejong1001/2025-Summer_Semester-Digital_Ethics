@@ -3,5 +3,3 @@ torchvision
 pillow
 pandas
 numpy
-io
-shutil
