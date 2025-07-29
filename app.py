@@ -177,13 +177,13 @@ def simulation():
             st.session_state.answer_given = False
         return
 
-    row = combined.loc[idx]
+    row = combined.loc[st.session_state.current_index]
     col1, col2 = st.columns([1, 1])
     with col1:
-        st.image(row['image'], width=220, caption=f"사진 {idx + 1} / {total_images}")
+        st.image(row['image'], width=220, caption=f"사진 {st.session_state.current_index + 1} / {total_images}")
 
     with col2:
-        choice = st.radio("이 이미지는 어떤가요?", ["Real", "Fake"], key=idx)
+        choice = st.radio("이 이미지는 어떤가요?", ["Real", "Fake"], key=st.session_state.current_index)
         if st.button("✅ 정답 확인"):
             if choice == row['label']:
                 st.success("🎯 정답입니다!")
