@@ -72,7 +72,7 @@ def deepfake_checker():
 
             actual = st.radio("위 이미지는 무엇인가요?", ["Real", "Fake"])
             consent = st.radio("이 이미지를 시뮬레이션에 사용하는 것에 동의하십니까?", ["동의", "미동의"])
-            answer
+            
             if st.button("응답 제출"):
                 if consent == "동의":
                     image_copy = image.copy()
