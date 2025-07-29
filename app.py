@@ -200,7 +200,7 @@ def simulation():
                     st.session_state.current_index += 1
                     st.session_state.answer_given = False
                     st.session_state.result_button = False
-                    st.session_state.image = False
+                    st.session_state.image = True
                     st.rerun()
 
             if st.session_state.result_button:
