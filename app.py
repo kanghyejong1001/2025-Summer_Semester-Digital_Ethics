@@ -168,6 +168,7 @@ def simulation():
         st.session_state.total = 0
         st.session_state.answer_given = False
         st.session_state.result_button = False
+        st.session_state.row = combined.loc[idx]
 
     idx = st.session_state.current_index
     if idx >= total_images:
@@ -182,9 +183,6 @@ def simulation():
             st.session_state.answer_given = False
         return
     else:
-        row = 0
-        if not row:
-            row = combined.loc[idx]
         col1, col2 = st.columns([1, 1])
         with col1:
             st.image(row['image'], width=220, caption=f"사진 {idx + 1} / {total_images}")
