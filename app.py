@@ -71,11 +71,15 @@ def deepfake_checker():
             consent = st.radio("이 이미지를 시뮬레이션에 사용하는 것에 동의하십니까?", ["동의", "미동의"])
             if st.button("응답 제출"):
                 if consent == "동의":
-                    st.session_state.user_images[actual.lower()].append({
-                        'image': image,
-                        'filename': uploaded_file.name
-                    })
-                    st.success("이미지가 세션에 저장되었습니다.")
+                    if uploaded_file is not None:
+                        image_copy = image.copy()
+                        st.session_state.user_images[actual.lower()].append({
+                            'image': image_copy,
+                            'filename': uploaded_file.name
+                        })
+                        st.success("✅ 이미지가 세션에 성공적으로 저장되었습니다.")
+                    else:
+                        st.warning("⚠️ 이미지가 업로드되지 않아 저장에 실패했습니다.")
                 else:
                     st.warning("사용 동의를 하지 않아 저장되지 않았습니다.")
 
