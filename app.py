@@ -101,8 +101,8 @@ def simulation():
 
     st.markdown("#### 📁 이미지 ZIP 업로드 (폴더 구조: `real/`, `fake/`)")
     zip_file = st.file_uploader("이미지 ZIP 파일을 업로드하세요.", type=["zip"], key="zip_uploader")
-
-    if zip_file:
+    zip_ok = False
+    if zip_file and zip_ok:
         zip_path = Path("temp_zip_upload")
         with zipfile.ZipFile(zip_file) as zf:
             zf.extractall(zip_path)
@@ -117,17 +117,20 @@ def simulation():
         fake_dir.mkdir(parents=True, exist_ok=True)
 
         # 이미지 이동
-        for label in ["real", "fake"]:
-            uploaded_dir = zip_path / label
-            if uploaded_dir.exists():
-                for file in uploaded_dir.glob("*.*"):
-                    if file.suffix.lower() in [".jpg", ".jpeg", ".png"]:
-                        dest = real_dir / file.name if label == "real" else fake_dir / file.name
-                        shutil.move(str(file), str(dest))
-
-        # 정리
-        shutil.rmtree(zip_path)
-        st.success("✅ ZIP 파일이 성공적으로 업로드되고 이미지가 분류되었습니다.")
+        try: 
+            for label in ["real", "fake"]:
+                uploaded_dir = zip_path / label
+                if uploaded_dir.exists():
+                    for file in uploaded_dir.glob("*.*"):
+                        if file.suffix.lower() in [".jpg", ".jpeg", ".png"]:
+                            dest = real_dir / file.name if label == "real" else fake_dir / file.name
+                            shutil.move(str(file), str(dest))
+            # 정리
+            shutil.rmtree(zip_path)
+            st.success("✅ ZIP 파일이 성공적으로 업로드되고 이미지가 분류되었습니다.")
+            zip_ok = True
+        except:
+            st.warning("❌ ZIP 파일을 업로드하지 못하였습니다.")
 
     username = st.text_input("닉네임 입력 (랭킹용)", value="익명 사용자")
     st.markdown("---")
