@@ -159,6 +159,7 @@ def simulation():
         return
 
     combined = pd.DataFrame(all_data)
+    st.write(combined)
     combined = combined.sample(frac=1).reset_index(drop=True)
     total_images = len(combined)
 
@@ -185,9 +186,7 @@ def simulation():
         row = combined.loc[idx]
         col1, col2 = st.columns([1, 1])
         with col1:
-            if st.session_state.answer_given:
-                current_image = row['image']
-            st.image(current_image, width=220, caption=f"사진 {idx + 1} / {total_images}")
+            st.image(row['image'], width=220, caption=f"사진 {idx + 1} / {total_images}")
 
         with col2:
             choice = st.radio("이 이미지는 어떤가요?", ["Real", "Fake"], key=idx)
