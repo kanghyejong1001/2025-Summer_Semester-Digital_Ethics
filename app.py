@@ -52,23 +52,25 @@ def predict_image(image):
 def deepfake_checker():
     st.subheader("이미지 판별 (AI 분석)")
     st.markdown("""
-    - 이미지를 업로드하면 AI가 분석합니다.
-    - 결과를 확인 후, 해당 이미지가 실제인지 딥페이크인지 체크하고 웹앱에서 사용 동의 여부를 입력합니다.
+    - 이미지를 업로드하면 AI가 딥페이크 이미지인지 실제 이미지인지 분석합니다.
     """)
+    # - 결과를 확인 후, 해당 이미지가 실제인지 딥페이크인지 체크하고 웹앱에서 사용 동의 여부를 입력합니다.
 
     if 'user_images' not in st.session_state:
         st.session_state.user_images = {'real': [], 'fake': []}
 
     uploaded_file = st.file_uploader("이미지를 업로드 해주세요.", type=["jpg", "jpeg", "png"])
     if uploaded_file:
-        image = Image.open(uploaded_file)
-        st.image(image, caption="업로드한 이미지", width=256)
-
-        if st.button("제출"):
-            prediction, prob, reason = predict_image(image)
-            st.success(f"예측 결과: {prediction}")
-            st.info(f"판별 확률: {prob*100}%")
-            st.write(f"판단 이유: {reason}")
+        image_column, result_column = st.columns([1,1])
+        with image_column:
+            image = Image.open(uploaded_file)
+            st.image(image, caption="업로드한 이미지", width=256)
+        with result_column:
+            if st.button("제출"):
+                prediction, prob, reason = predict_image(image)
+                st.success(f"예측 결과: {prediction}")
+                st.info(f"판별 확률: {prob*100}%")
+                st.write(f"판단 이유: {reason}")
 
             # actual = st.radio("위 이미지는 무엇인가요?", ["Real", "Fake"])
             # consent = st.radio("이 이미지를 시뮬레이션에 사용하는 것에 동의하십니까?", ["동의", "미동의"])
