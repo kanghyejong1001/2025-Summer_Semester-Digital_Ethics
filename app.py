@@ -182,11 +182,10 @@ def simulation():
             st.session_state.answer_given = False
         return
     else:
+        row = combined.loc[idx]
         col1, col2 = st.columns([1, 1])
         with col1:
-            if 'row' not in st.session_state:
-                st.session_state.row = combined.loc[idx]
-            st.image(st.session_state.row['image'], width=220, caption=f"사진 {idx + 1} / {total_images}")
+            st.image(row['image'], width=220, caption=f"사진 {idx + 1} / {total_images}")
 
         with col2:
             choice = st.radio("이 이미지는 어떤가요?", ["Real", "Fake"], key=idx)
@@ -198,16 +197,13 @@ def simulation():
                     st.session_state.current_index += 1
                     st.session_state.answer_given = False
                     st.session_state.result_button = False
-                    st.session_state.row = combined.loc[idx]
-
-            st.rerun()
 
             if st.session_state.answer_given:
-                if choice == st.session_state.row['label']:
+                if choice == row['label']:
                     st.success("🎯 정답입니다!")
                     st.session_state.score += 1
                 else:
-                    st.error(f"❌ 오답입니다. 정답은 {st.session_state.row['label']}입니다.")
+                    st.error(f"❌ 오답입니다. 정답은 {row['label']}입니다.")
                 st.session_state.total += 1
                 st.session_state.result_button = True
 
