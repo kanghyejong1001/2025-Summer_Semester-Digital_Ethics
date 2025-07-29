@@ -183,33 +183,33 @@ def simulation():
             st.session_state.answer_given = False
         return
     else:
-        row = combined.loc[idx]
+        if st.session_state.answer_given and st.session_state.result_button:
+            row = combined.loc[idx]
         col1, col2 = st.columns([1, 1])
         with col1:
             st.image(row['image'], width=220, caption=f"사진 {idx + 1} / {total_images}")
 
         with col2:
             choice = st.radio("이 이미지는 어떤가요?", ["Real", "Fake"], key=idx)
-            if not st.session_state.answer_given:
+            if not st.session_state.result_button:
                 if st.button("✅ 정답 확인"):
-                    st.session_state.result_button = True
-                    st.rerun()
+                    st.session_state.answer_given = True
             else:
                 if st.button("➡️ 다음 문제"):
                     st.session_state.current_index += 1
                     st.session_state.answer_given = False
                     st.session_state.result_button = False
-                    st.rerun()
 
-            if st.session_state.result_button:
+            st.rerun()
+
+            if st.session_state.answer_given:
                 if choice == row['label']:
                     st.success("🎯 정답입니다!")
                     st.session_state.score += 1
                 else:
                     st.error(f"❌ 오답입니다. 정답은 {row['label']}입니다.")
                 st.session_state.total += 1
-                st.session_state.answer_given = True
-                st.session_state.button_clicked = False
+                st.session_state.result_button = True
 
     st.markdown("---")
     st.metric("누적 정답률", f"{(st.session_state.total_correct / st.session_state.total_attempt * 100):.1f}%" if st.session_state.total_attempt else "0.0%")
