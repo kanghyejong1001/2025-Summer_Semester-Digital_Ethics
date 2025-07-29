@@ -70,8 +70,8 @@ def deepfake_checker():
             st.info(f"판별 확률: {prob*100}%")
             st.write(f"판단 이유: {reason}")
 
-            actual = st.radio("위 이미지는 무엇인가요?", ["Real", "Fake"])
-            consent = st.radio("이 이미지를 시뮬레이션에 사용하는 것에 동의하십니까?", ["동의", "미동의"])
+            # actual = st.radio("위 이미지는 무엇인가요?", ["Real", "Fake"])
+            # consent = st.radio("이 이미지를 시뮬레이션에 사용하는 것에 동의하십니까?", ["동의", "미동의"])
             
             # if st.button("응답 제출"):
             #     if consent == "동의":
