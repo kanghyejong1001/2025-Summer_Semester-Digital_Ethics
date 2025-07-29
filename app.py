@@ -189,10 +189,12 @@ def simulation():
 
         with col2:
             if st.button('Fake'):
+                st.rerun()
                 if row['label'] == 'Fake':
                     st.success("🎯 정답입니다!")
                     st.session_state.score += 1
             if st.button('Real'):
+                st.rerun()
                 if row['label'] == 'Real':
                     st.error(f"❌ 오답입니다. 정답은 {row['label']}입니다.")
             st.session_state.total += 1
