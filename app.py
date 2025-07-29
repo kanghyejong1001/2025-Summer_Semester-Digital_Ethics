@@ -159,7 +159,6 @@ def simulation():
         return
 
     combined = pd.DataFrame(all_data)
-    st.write(combined)
     combined = combined.sample(frac=1).reset_index(drop=True)
     total_images = len(combined)
 
@@ -183,7 +182,8 @@ def simulation():
             st.session_state.answer_given = False
         return
     else:
-        if st.session_state.answer_given and st.session_state.result_button:
+        row = 0
+        if not row:
             row = combined.loc[idx]
         col1, col2 = st.columns([1, 1])
         with col1:
@@ -199,6 +199,7 @@ def simulation():
                     st.session_state.current_index += 1
                     st.session_state.answer_given = False
                     st.session_state.result_button = False
+                    row = combined.loc[idx]
 
             st.rerun()
 
