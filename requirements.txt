@@ -3,3 +3,6 @@ torchvision
 pillow
 pandas
 numpy
+zipfile
+io
+shutil
