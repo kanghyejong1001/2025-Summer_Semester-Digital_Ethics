@@ -101,7 +101,7 @@ def simulation():
 
     st.markdown("#### 📁 이미지 ZIP 업로드 (폴더 구조: `real/`, `fake/`)")
     zip_file = st.file_uploader("이미지 ZIP 파일을 업로드하세요.", type=["zip"], key="zip_uploader")
-    zip_ok = False
+    zip_ok = True
     if zip_file and zip_ok:
         zip_path = Path("temp_zip_upload")
         with zipfile.ZipFile(zip_file) as zf:
@@ -128,7 +128,7 @@ def simulation():
             # 정리
             shutil.rmtree(zip_path)
             st.success("✅ ZIP 파일이 성공적으로 업로드되고 이미지가 분류되었습니다.")
-            zip_ok = True
+            zip_ok = False
         except:
             st.warning("❌ ZIP 파일을 업로드하지 못하였습니다.")
 
@@ -173,14 +173,12 @@ def simulation():
         st.session_state.total_attempt += st.session_state.total
         st.session_state.scoreboard.append({"user": username, "score": st.session_state.score, "total": st.session_state.total})
         if st.button("🔄 다시 시작"):
-            idx = 0
             st.session_state.current_index = 0
             st.session_state.score = 0
             st.session_state.total = 0
             st.session_state.answer_given = False
         return
-    
-    if st.button("🕹게임 시작!"):
+    else:
         row = combined.loc[idx]
         col1, col2 = st.columns([1, 1])
         with col1:
@@ -199,7 +197,6 @@ def simulation():
 
             if st.session_state.answer_given:
                 if st.button("➡️ 다음 문제"):
-                    idx += 1
                     st.session_state.current_index += 1
                     st.session_state.answer_given = False
 
