@@ -200,7 +200,7 @@ def simulation():
                     st.session_state.answer_given = False
                     st.session_state.result_button = False
                     st.rerun()
-                    
+
             if st.session_state.result_button:
                 if choice == row['label']:
                     st.success("🎯 정답입니다!")
@@ -209,7 +209,7 @@ def simulation():
                     st.error(f"❌ 오답입니다. 정답은 {row['label']}입니다.")
                 st.session_state.total += 1
                 st.session_state.answer_given = True
-                st.seesion_state.button_clicked = False
+                st.session_state.button_clicked = False
 
     st.markdown("---")
     st.metric("누적 정답률", f"{(st.session_state.total_correct / st.session_state.total_attempt * 100):.1f}%" if st.session_state.total_attempt else "0.0%")
