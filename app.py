@@ -164,7 +164,6 @@ def simulation():
         st.session_state.answer_given = False
 
     idx = st.session_state.current_index
-    idx = 0
     if idx >= total_images:
         st.success(f"🎉 게임 종료! 최종 점수: {st.session_state.score}/{st.session_state.total}")
         st.session_state.total_correct += st.session_state.score
@@ -177,28 +176,29 @@ def simulation():
             st.session_state.total = 0
             st.session_state.answer_given = False
         return
+    
+    if st.button("🕹게임 시작!"):
+        row = combined.loc[idx]
+        col1, col2 = st.columns([1, 1])
+        with col1:
+            st.image(row['image'], width=220, caption=f"사진 {idx + 1} / {total_images}")
 
-    row = combined.loc[idx]
-    col1, col2 = st.columns([1, 1])
-    with col1:
-        st.image(row['image'], width=220, caption=f"사진 {idx + 1} / {total_images}")
+        with col2:
+            choice = st.radio("이 이미지는 어떤가요?", ["Real", "Fake"], key=idx)
+            if st.button("✅ 정답 확인"):
+                if choice == row['label']:
+                    st.success("🎯 정답입니다!")
+                    st.session_state.score += 1
+                else:
+                    st.error(f"❌ 오답입니다. 정답은 {row['label']}입니다.")
+                st.session_state.total += 1
+                st.session_state.answer_given = True
 
-    with col2:
-        choice = st.radio("이 이미지는 어떤가요?", ["Real", "Fake"], key=idx)
-        if st.button("✅ 정답 확인"):
-            if choice == row['label']:
-                st.success("🎯 정답입니다!")
-                st.session_state.score += 1
-            else:
-                st.error(f"❌ 오답입니다. 정답은 {row['label']}입니다.")
-            st.session_state.total += 1
-            st.session_state.answer_given = True
-
-        if st.session_state.answer_given:
-            if st.button("➡️ 다음 문제"):
-                idx += 1
-                st.session_state.current_index += 1
-                st.session_state.answer_given = False
+            if st.session_state.answer_given:
+                if st.button("➡️ 다음 문제"):
+                    idx += 1
+                    st.session_state.current_index += 1
+                    st.session_state.answer_given = False
 
     st.markdown("---")
     st.metric("누적 정답률", f"{(st.session_state.total_correct / st.session_state.total_attempt * 100):.1f}%" if st.session_state.total_attempt else "0.0%")
