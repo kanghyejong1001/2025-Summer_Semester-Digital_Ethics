@@ -99,9 +99,6 @@ def simulation():
     if 'user_images' not in st.session_state:
         st.session_state.user_images = {'real': [], 'fake': []}
 
-    username = st.text_input("닉네임 입력 (랭킹용)", value="익명 사용자")
-    st.markdown("---")
-
     st.markdown("#### 📁 이미지 ZIP 업로드 (폴더 구조: `real/`, `fake/`)")
     zip_file = st.file_uploader("이미지 ZIP 파일을 업로드하세요.", type=["zip"], key="zip_uploader")
 
@@ -132,6 +129,8 @@ def simulation():
         shutil.rmtree(zip_path)
         st.success("✅ ZIP 파일이 성공적으로 업로드되고 이미지가 분류되었습니다.")
 
+    username = st.text_input("닉네임 입력 (랭킹용)", value="익명 사용자")
+    st.markdown("---")
 
     user_files = []
     for label in ["real", "fake"]:
@@ -165,25 +164,27 @@ def simulation():
         st.session_state.answer_given = False
 
     idx = st.session_state.current_index
+    idx = 0
     if idx >= total_images:
         st.success(f"🎉 게임 종료! 최종 점수: {st.session_state.score}/{st.session_state.total}")
         st.session_state.total_correct += st.session_state.score
         st.session_state.total_attempt += st.session_state.total
         st.session_state.scoreboard.append({"user": username, "score": st.session_state.score, "total": st.session_state.total})
         if st.button("🔄 다시 시작"):
+            idx = 0
             st.session_state.current_index = 0
             st.session_state.score = 0
             st.session_state.total = 0
             st.session_state.answer_given = False
         return
 
-    row = combined.loc[st.session_state.current_index]
+    row = combined.loc[idx]
     col1, col2 = st.columns([1, 1])
     with col1:
-        st.image(row['image'], width=220, caption=f"사진 {st.session_state.current_index + 1} / {total_images}")
+        st.image(row['image'], width=220, caption=f"사진 {idx + 1} / {total_images}")
 
     with col2:
-        choice = st.radio("이 이미지는 어떤가요?", ["Real", "Fake"], key=st.session_state.current_index)
+        choice = st.radio("이 이미지는 어떤가요?", ["Real", "Fake"], key=idx)
         if st.button("✅ 정답 확인"):
             if choice == row['label']:
                 st.success("🎯 정답입니다!")
@@ -195,6 +196,7 @@ def simulation():
 
         if st.session_state.answer_given:
             if st.button("➡️ 다음 문제"):
+                idx += 1
                 st.session_state.current_index += 1
                 st.session_state.answer_given = False
 
