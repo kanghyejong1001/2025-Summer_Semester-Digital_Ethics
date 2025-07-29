@@ -203,11 +203,11 @@ def simulation():
             st.rerun()
 
             if st.session_state.answer_given:
-                if choice == row['label']:
+                if choice == st.session_state.row['label']:
                     st.success("🎯 정답입니다!")
                     st.session_state.score += 1
                 else:
-                    st.error(f"❌ 오답입니다. 정답은 {row['label']}입니다.")
+                    st.error(f"❌ 오답입니다. 정답은 {st.session_state.row['label']}입니다.")
                 st.session_state.total += 1
                 st.session_state.result_button = True
 
