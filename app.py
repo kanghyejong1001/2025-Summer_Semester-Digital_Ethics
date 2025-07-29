@@ -1,12 +1,12 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import zipfile
 from PIL import Image
-import io
+from pathlib import Path
 import torchvision.transforms as transforms
 import torch
 from torchvision import models
+import user_images
 
 # ---------------------------
 # 사이드바 소개
@@ -71,15 +71,12 @@ def deepfake_checker():
             consent = st.radio("이 이미지를 시뮬레이션에 사용하는 것에 동의하십니까?", ["동의", "미동의"])
             if st.button("응답 제출"):
                 if consent == "동의":
-                    if uploaded_file is not None:
-                        image_copy = image.copy()
-                        st.session_state.user_images[actual.lower()].append({
-                            'image': image_copy,
-                            'filename': uploaded_file.name
-                        })
-                        st.success("✅ 이미지가 세션에 성공적으로 저장되었습니다.")
-                    else:
-                        st.warning("⚠️ 이미지가 업로드되지 않아 저장에 실패했습니다.")
+                    image_copy = image.copy()
+                    st.session_state.user_images[actual.lower()].append({
+                        'image': image_copy,
+                        'filename': uploaded_file.name
+                    })
+                    st.success("✅ 이미지가 세션에 성공적으로 저장되었습니다.")
                 else:
                     st.warning("사용 동의를 하지 않아 저장되지 않았습니다.")
 
@@ -99,27 +96,26 @@ def simulation():
 
     username = st.text_input("닉네임 입력 (랭킹용)", value="익명 사용자")
     st.markdown("---")
-    st.markdown("#### 📥 외부 데이터셋 업로드(zip, Real/Fake 폴더 구조)")
-    dataset_zip = st.file_uploader("데이터셋 업로드", type="zip")
-
-    external_files = []
-    if dataset_zip:
-        with zipfile.ZipFile(dataset_zip) as zf:
-            for name in zf.namelist():
-                if name.endswith(('.png', '.jpg', '.jpeg')) and ('real/' in name or 'fake/' in name):
-                    label = 'real' if 'real/' in name else 'fake'
-                    with zf.open(name) as file:
-                        image = Image.open(file).convert("RGB")
-                        external_files.append({"image": image, "label": label.capitalize(), "filename": name.split('/')[-1]})
 
     user_files = []
     for label in ["real", "fake"]:
         for item in st.session_state.user_images[label]:
             user_files.append({"image": item['image'], "label": label.capitalize(), "filename": item['filename']})
 
-    all_data = user_files + external_files
+        folder_path = Path(user_images.__path__[0]) / label
+        for file_path in folder_path.glob("*.jpg"):
+            img = Image.open(file_path).convert("RGB")
+            user_files.append({"image": img, "label": label.capitalize(), "filename": file_path.name})
+        for file_path in folder_path.glob("*.png"):
+            img = Image.open(file_path).convert("RGB")
+            user_files.append({"image": img, "label": label.capitalize(), "filename": file_path.name})
+        for file_path in folder_path.glob("*.jpeg"):
+            img = Image.open(file_path).convert("RGB")
+            user_files.append({"image": img, "label": label.capitalize(), "filename": file_path.name})
+
+    all_data = user_files
     if not all_data:
-        st.warning("사용자 또는 외부 이미지가 없습니다.")
+        st.warning("사용자 또는 폴더 내 이미지가 없습니다.")
         return
 
     combined = pd.DataFrame(all_data)
