@@ -198,6 +198,8 @@ def simulation():
                     st.session_state.answer_given = False
                     st.session_state.result_button = False
 
+            st.rerun()
+
             if st.session_state.answer_given:
                 if choice == row['label']:
                     st.success("🎯 정답입니다!")
