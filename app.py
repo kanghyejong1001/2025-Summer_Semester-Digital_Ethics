@@ -168,8 +168,9 @@ def simulation():
         st.session_state.total = 0
         st.session_state.answer_given = False
         st.session_state.result_button = False
+    if 'image' not in st.session_state:
         st.session_state.image = True
-
+        
     idx = st.session_state.current_index
     if idx >= total_images:
         st.success(f"🎉 게임 종료! 최종 점수: {st.session_state.score}/{st.session_state.total}")
