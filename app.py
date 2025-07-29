@@ -192,13 +192,13 @@ def simulation():
             if not st.session_state.result_button:
                 if st.button("✅ 정답 확인"):
                     st.session_state.answer_given = True
+                    st.rerun()
             else:
                 if st.button("➡️ 다음 문제"):
                     st.session_state.current_index += 1
                     st.session_state.answer_given = False
                     st.session_state.result_button = False
-
-            st.rerun()
+                    st.rerun()
 
             if st.session_state.answer_given:
                 if choice == row['label']:
