@@ -188,7 +188,15 @@ def simulation():
             record = {"user": username or "익명", "score": correct, "total": total_fake, "accuracy": accuracy}
             log_path = Path("score_logs.json")
             if log_path.exists():
-                logs = json.loads(log_path.read_text())
+                text = log_path.read_text().strip()
+                if text:  # 파일 내용이 있을 때만 로드
+                    try:
+                        logs = json.loads(text)
+                    except json.JSONDecodeError:
+                        st.warning("⚠️ 랭킹 파일이 손상되어 초기화됩니다.")
+                        logs = []
+                else:
+                    logs = []  # 빈 파일이면 빈 리스트로
             else:
                 logs = []
 
