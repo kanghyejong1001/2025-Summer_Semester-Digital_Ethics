@@ -197,29 +197,38 @@ def simulation():
             logs = sorted(logs, key=lambda x: (-x["score"], -x["accuracy"]))[:10]
             log_path.write_text(json.dumps(logs, indent=2, ensure_ascii=False))
 
-            st.markdown("### 🏆 TOP 10 랭킹")
-            df = pd.DataFrame(logs)
-            df = df.rename(columns={"user": "닉네임", "score": "정답 수", "total": "전체 Fake 수", "accuracy": "정답률 (%)"})
-            st.dataframe(df, use_container_width=True)
-
-    if "show_ranking" not in st.session_state:
-        st.session_state.show_ranking = False
-
-    # 랭킹 표시 설정 함수
-    def show_ranking_callback():
-        st.session_state.show_ranking = True
+            st.session_state.show_ranking = True  # 랭킹 반영 후 즉시 보여줌
 
     # 랭킹 확인 버튼
-    st.button("🏆 랭킹 확인", on_click=show_ranking_callback)
+    if st.button("🏆 랭킹 확인"):
+        st.session_state.show_ranking = True
 
-        # 랭킹 보여주기
+    # 랭킹 보여주기
     if st.session_state.show_ranking:
         log_path = Path("score_logs.json")
         if log_path.exists():
-            logs = json.loads(log_path.read_text())
+            try:
+                text = log_path.read_text().strip()
+                if text:
+                    logs = json.loads(text)
+                else:
+                    logs = []
+            except json.JSONDecodeError:
+                logs = []
+                st.warning("⚠️ 랭킹 파일을 읽을 수 없습니다.")
+        else:
+            logs = []
+
+        if logs:
             st.markdown("### 🏆 TOP 10 랭킹")
             df = pd.DataFrame(logs)
-            df = df.rename(columns={"user": "닉네임", "score": "정답 수", "total": "전체 Fake 수", "accuracy": "정답률 (%)"})
+            df = df.rename(columns={
+                "user": "닉네임",
+                "score": "정답 수",
+                "total": "전체 Fake 수",
+                "accuracy": "정답률 (%)"
+            })
+            df["정답률 (%)"] = df["정답률 (%)"].map(lambda x: f"{x:.2f}%")
             st.dataframe(df, use_container_width=True)
         else:
             st.info("아직 등록된 랭킹이 없습니다.")
