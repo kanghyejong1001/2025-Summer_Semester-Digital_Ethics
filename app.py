@@ -153,9 +153,6 @@ def simulation():
 
     # 제출 버튼
     if st.button("✅ 결과 제출"):
-        accuracy = (correct / total_fake * 100) if total_fake > 0 else 0.0
-        st.markdown(f"### 🎯 점수: {correct} / {total_fake} (정답률: {accuracy:.2f}%)")
-
         correct = 0
         total_fake = 0
         st.markdown("---")
@@ -173,6 +170,9 @@ def simulation():
             else:
                 if selected:
                     st.error(f"🔴 이미지 {i+1}: 실제인데 선택함 (오답)")
+
+        accuracy = (correct / total_fake * 100) if total_fake > 0 else 0.0
+        st.markdown(f"### 🎯 점수: {correct} / {total_fake} (정답률: {accuracy:.2f}%)")
 
         # 랭킹 저장
         st.markdown("---")
