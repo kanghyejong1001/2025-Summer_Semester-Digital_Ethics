@@ -1,12 +1,10 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
-from PIL import Image
 from pathlib import Path
-import torchvision.transforms as transforms
+from PIL import Image
 import torch
 from torchvision import models
-from PIL import Image
+import torchvision.transforms as transforms
 import random
 import json
 
