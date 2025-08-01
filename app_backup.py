@@ -50,55 +50,41 @@ def predict_image(image):
 # 이미지 판별 탭
 # ---------------------------
 def deepfake_checker():
-    st.subheader("🔍 실제 이미지 vs 딥페이크 이미지 비교")
-
+    st.subheader("이미지 판별 (AI 분석)")
     st.markdown("""
-    - 좌측에는 실제 이미지를, 우측에는 딥페이크 이미지를 업로드하세요.
-    - AI가 두 이미지를 각각 분석하여 결과와 확률을 비교합니다.
+    - 이미지를 업로드하면 AI가 딥페이크 이미지인지 실제 이미지인지 분석합니다.
     """)
+    # - 결과를 확인 후, 해당 이미지가 실제인지 딥페이크인지 체크하고 웹앱에서 사용 동의 여부를 입력합니다.
 
-    col1, col2 = st.columns(2)
+    if 'user_images' not in st.session_state:
+        st.session_state.user_images = {'real': [], 'fake': []}
 
-    with col1:
-        st.markdown("### 🟢 실제 이미지 업로드")
-        real_file = st.file_uploader("실제 이미지", type=["jpg", "jpeg", "png"], key="real")
-        if real_file:
-            real_image = Image.open(real_file)
-            st.image(real_image, caption="실제 이미지", width=256)
-        else:
-            real_image = None
+    uploaded_file = st.file_uploader("이미지를 업로드 해주세요.", type=["jpg", "jpeg", "png"])
+    if uploaded_file:
+        image_column, result_column = st.columns([1,1])
+        with image_column:
+            image = Image.open(uploaded_file)
+            st.image(image, caption="업로드한 이미지", width=256)
+        with result_column:
+            if st.button("제출"):
+                prediction, prob, reason = predict_image(image)
+                st.success(f"예측 결과: {prediction}")
+                st.info(f"판별 확률: {prob*100}%")
+                st.write(f"판단 이유: {reason}")
 
-    with col2:
-        st.markdown("### 🔴 딥페이크 이미지 업로드")
-        fake_file = st.file_uploader("딥페이크 이미지", type=["jpg", "jpeg", "png"], key="fake")
-        if fake_file:
-            fake_image = Image.open(fake_file)
-            st.image(fake_image, caption="딥페이크 이미지", width=256)
-        else:
-            fake_image = None
-
-    # 결과 비교
-    if real_image and fake_image:
-        if st.button("📊 AI로 비교 분석"):
-            # 각각 예측
-            pred_real, prob_real, reason_real = predict_image(real_image)
-            pred_fake, prob_fake, reason_fake = predict_image(fake_image)
-
-            # 결과 테이블 출력
-            st.markdown("### ✅ 예측 결과 비교")
-            result_df = pd.DataFrame({
-                "이미지": ["실제 이미지", "딥페이크 이미지"],
-                "예측 결과": [pred_real, pred_fake],
-                "판별 확률": [f"{prob_real*100:.2f}%", f"{prob_fake*100:.2f}%"],
-                "판단 근거": [reason_real, reason_fake]
-            })
-            st.dataframe(result_df)
-
-            # 결과 해석 안내
-            st.markdown("🧠 **해석 가이드:**")
-            st.markdown("- AI는 ResNet18 분류 결과의 특정 클래스 확률을 기반으로 판단합니다.")
-            st.markdown("- 실제 이미지와 딥페이크 이미지 모두 `Real` 또는 `Fake`으로 잘못 분류될 수 있습니다.")
-
+            # actual = st.radio("위 이미지는 무엇인가요?", ["Real", "Fake"])
+            # consent = st.radio("이 이미지를 시뮬레이션에 사용하는 것에 동의하십니까?", ["동의", "미동의"])
+            
+            # if st.button("응답 제출"):
+            #     if consent == "동의":
+            #         image_copy = image.copy()
+            #         st.session_state.user_images[actual.lower()].append({
+            #             'image': image_copy,
+            #             'filename': uploaded_file.name
+            #         })
+            #         st.success("✅ 이미지가 세션에 성공적으로 저장되었습니다.")
+            #     else:
+            #         st.warning("사용 동의를 하지 않아 저장되지 않았습니다.")
             
 
 # ---------------------------
