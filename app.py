@@ -202,7 +202,10 @@ def simulation():
             st.dataframe(df, use_container_width=True)
 
         # 랭킹 확인 버튼
-        if st.button("🏆 랭킹 확인", on_click=show_ranking_callback):
+        st.button("🏆 랭킹 확인", on_click=show_ranking_callback)
+
+        # 랭킹 보여주기
+        if st.session_state.show_ranking:
             log_path = Path("score_logs.json")
             if log_path.exists():
                 logs = json.loads(log_path.read_text())
