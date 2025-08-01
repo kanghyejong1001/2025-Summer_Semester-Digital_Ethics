@@ -177,7 +177,7 @@ def simulation():
         st.markdown("#### 📝 닉네임을 입력하고 랭킹에 등록하세요")
         username = st.text_input("닉네임", max_chars=20, key="nickname_input")
 
-        if st.button("📊 랭킹에 반영", on_click=show_ranking_callback):
+        if st.button("📊 랭킹에 반영"):
             record = {"user": username or "익명", "score": correct, "total": total_fake, "accuracy": accuracy}
             log_path = Path("score_logs.json")
             if log_path.exists():
