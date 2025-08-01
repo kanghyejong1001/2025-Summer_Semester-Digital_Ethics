@@ -177,11 +177,14 @@ def simulation():
         st.markdown("#### 📝 닉네임을 입력하고 랭킹에 등록하세요")
         username = st.text_input("닉네임", max_chars=20, key="nickname_input")
 
-        if st.button("📊 랭킹에 반영"):
-            st.session_state.show_ranking = True  # ← 클릭 시 상태 저장
+        if "show_ranking" not in st.session_state:
+            st.session_state.show_ranking = False
 
-        # 랭킹 보여주기
-        if st.session_state.get("show_ranking", False):
+        # 랭킹 표시 설정 함수
+        def show_ranking_callback():
+            st.session_state.show_ranking = True
+
+        if st.button("📊 랭킹에 반영", on_click=show_ranking_callback):
             record = {"user": username or "익명", "score": correct, "total": total_fake, "accuracy": accuracy}
             log_path = Path("score_logs.json")
             if log_path.exists():
@@ -199,11 +202,7 @@ def simulation():
             st.dataframe(df, use_container_width=True)
 
         # 랭킹 확인 버튼
-        if st.button("🏆 랭킹 확인"):
-            st.session_state.show_ranking = True  # ← 클릭 시 상태 저장
-
-        # 랭킹 보여주기
-        if st.session_state.get("show_ranking", False):
+        if st.button("🏆 랭킹 확인", on_click=show_ranking_callback):
             log_path = Path("score_logs.json")
             if log_path.exists():
                 logs = json.loads(log_path.read_text())
