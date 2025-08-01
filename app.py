@@ -177,13 +177,6 @@ def simulation():
         st.markdown("#### 📝 닉네임을 입력하고 랭킹에 등록하세요")
         username = st.text_input("닉네임", max_chars=20, key="nickname_input")
 
-        if "show_ranking" not in st.session_state:
-            st.session_state.show_ranking = False
-
-        # 랭킹 표시 설정 함수
-        def show_ranking_callback():
-            st.session_state.show_ranking = True
-
         if st.button("📊 랭킹에 반영", on_click=show_ranking_callback):
             record = {"user": username or "익명", "score": correct, "total": total_fake, "accuracy": accuracy}
             log_path = Path("score_logs.json")
@@ -209,20 +202,27 @@ def simulation():
             df = df.rename(columns={"user": "닉네임", "score": "정답 수", "total": "전체 Fake 수", "accuracy": "정답률 (%)"})
             st.dataframe(df, use_container_width=True)
 
-        # 랭킹 확인 버튼
-        st.button("🏆 랭킹 확인", on_click=show_ranking_callback)
+    if "show_ranking" not in st.session_state:
+        st.session_state.show_ranking = False
+
+    # 랭킹 표시 설정 함수
+    def show_ranking_callback():
+        st.session_state.show_ranking = True
+
+    # 랭킹 확인 버튼
+    st.button("🏆 랭킹 확인", on_click=show_ranking_callback)
 
         # 랭킹 보여주기
-        if st.session_state.show_ranking:
-            log_path = Path("score_logs.json")
-            if log_path.exists():
-                logs = json.loads(log_path.read_text())
-                st.markdown("### 🏆 TOP 10 랭킹")
-                df = pd.DataFrame(logs)
-                df = df.rename(columns={"user": "닉네임", "score": "정답 수", "total": "전체 Fake 수", "accuracy": "정답률 (%)"})
-                st.dataframe(df, use_container_width=True)
-            else:
-                st.info("아직 등록된 랭킹이 없습니다.")
+    if st.session_state.show_ranking:
+        log_path = Path("score_logs.json")
+        if log_path.exists():
+            logs = json.loads(log_path.read_text())
+            st.markdown("### 🏆 TOP 10 랭킹")
+            df = pd.DataFrame(logs)
+            df = df.rename(columns={"user": "닉네임", "score": "정답 수", "total": "전체 Fake 수", "accuracy": "정답률 (%)"})
+            st.dataframe(df, use_container_width=True)
+        else:
+            st.info("아직 등록된 랭킹이 없습니다.")
 
 
 # ---------------------------
