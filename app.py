@@ -116,7 +116,7 @@ def simulation():
 
     if st.button("🔁 문제 새로고침"):
         del st.session_state.quiz_images
-        st.experimental_rerun()
+        st.rerun()
 
     # 이미지 고정: 세션 상태에 없으면 한 번만 로딩
     if "quiz_images" not in st.session_state:
