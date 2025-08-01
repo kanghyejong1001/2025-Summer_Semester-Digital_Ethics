@@ -178,6 +178,10 @@ def simulation():
         username = st.text_input("닉네임", max_chars=20, key="nickname_input")
 
         if st.button("📊 랭킹에 반영"):
+            st.session_state.show_ranking = True  # ← 클릭 시 상태 저장
+
+        # 랭킹 보여주기
+        if st.session_state.get("show_ranking", False):
             record = {"user": username or "익명", "score": correct, "total": total_fake, "accuracy": accuracy}
             log_path = Path("score_logs.json")
             if log_path.exists():
@@ -196,6 +200,10 @@ def simulation():
 
         # 랭킹 확인 버튼
         if st.button("🏆 랭킹 확인"):
+            st.session_state.show_ranking = True  # ← 클릭 시 상태 저장
+
+        # 랭킹 보여주기
+        if st.session_state.get("show_ranking", False):
             log_path = Path("score_logs.json")
             if log_path.exists():
                 logs = json.loads(log_path.read_text())
