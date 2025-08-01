@@ -116,23 +116,30 @@ def simulation():
     아래 무작위로 표시된 **10장의 이미지** 중에서, 딥페이크(Fake)라고 생각되는 이미지만 선택하세요.
     """)
 
-    # 이미지 로딩
-    def load_images_from_folder(folder, label):
-        path = Path(folder)
-        image_files = list(path.glob("*"))
-        images = []
-        for f in image_files:
-            try:
-                img = Image.open(f).convert("RGB")
-                images.append({"image": img, "label": label, "path": str(f)})
-            except:
-                continue
-        return images
+    if st.button("🔁 문제 새로고침"):
+        del st.session_state.quiz_images
+        st.experimental_rerun()
 
-    real_images = load_images_from_folder("real", "Real")
-    fake_images = load_images_from_folder("fake", "Fake")
-    combined = real_images + fake_images
-    quiz_images = random.sample(combined, min(10, len(combined)))
+    # 이미지 고정: 세션 상태에 없으면 한 번만 로딩
+    if "quiz_images" not in st.session_state:
+        def load_images_from_folder(folder, label):
+            path = Path(folder)
+            image_files = list(path.glob("*"))
+            images = []
+            for f in image_files:
+                try:
+                    img = Image.open(f).convert("RGB")
+                    images.append({"image": img, "label": label, "path": str(f)})
+                except:
+                    continue
+            return images
+
+        real_images = load_images_from_folder("real", "Real")
+        fake_images = load_images_from_folder("fake", "Fake")
+        combined = real_images + fake_images
+        st.session_state.quiz_images = random.sample(combined, min(10, len(combined)))
+
+    quiz_images = st.session_state.quiz_images
 
     # 유저 선택
     selected_indices = []
