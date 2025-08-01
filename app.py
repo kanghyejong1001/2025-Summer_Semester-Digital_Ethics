@@ -6,24 +6,29 @@ from pathlib import Path
 import torchvision.transforms as transforms
 import torch
 from torchvision import models
-import user_images
-import zipfile
-import io
-import shutil
+from PIL import Image
+import random
+import json
 
 # ---------------------------
 # 사이드바 소개
 # ---------------------------
 st.sidebar.title("웹앱 소개")
 st.sidebar.markdown("""
-이 웹앱은 AI 모델을 활용하여 이미지가 딥페이크(Fake)인지 실제(Real)인지 판별하고,
-결과를 통해 딥페이크 기술의 위험성과 활용의 적절성을 판단할 수 있도록 돕는 도구입니다.
+이 웹앱은 **딥페이크 vs 실제 이미지의 AI 판별해보고, 직접 구별도 해볼 수 있는 체험 도구**로,  
+학생들이 인공지능 기술의 원리와 윤리적 활용 방안을 탐구할 수 있도록 설계되었습니다.
 
-이 활동을 통해 고등학생들은 다음과 같은 역량을 기를 수 있습니다:
-- 컴퓨팅 사고력: 문제 분해, 패턴 인식
-- 인공지능 소양: AI의 원리와 한계 이해
-- 디지털 문화 소양: 딥페이크의 사회적 영향에 대한 인식
+### 🔍 주요 활동
+- **AI 이미지 판별** 체험 (실제 vs 딥페이크)
+- **딥페이크 vs 실제 이미지 직접 구별**
+
+### 🎯 기대 효과
+- 민감 정보(얼굴 이미지)의 윤리적 취급 학습
+- 딥페이크 기술의 **위험성과 책임 소재에 대한 비판적 사고** 함양
+
+이 웹앱은 '정보'와 '현대사회와 윤리' 교과의 AI 융합 교육 수업을 위해 제작되었습니다.
 """)
+
 
 # ---------------------------
 # AI 예측 모델
@@ -104,160 +109,133 @@ def deepfake_checker():
 # ---------------------------
 # 딥페이크 vs 실제 시뮬레이션
 # ---------------------------
+
 def simulation():
-    st.subheader("🎮 딥페이크 vs 실제 구별")
+    st.subheader("🎯 딥페이크 vs 실제 이미지 구별 시뮬레이션")
+    st.markdown("""
+    아래 무작위로 표시된 **10장의 이미지** 중에서, 딥페이크(Fake)라고 생각되는 이미지만 선택하세요.
+    """)
 
-    if 'total_correct' not in st.session_state:
-        st.session_state.total_correct = 0
-        st.session_state.total_attempt = 0
-        st.session_state.scoreboard = []
+    # 이미지 로딩
+    def load_images_from_folder(folder, label):
+        path = Path(folder)
+        image_files = list(path.glob("*"))
+        images = []
+        for f in image_files:
+            try:
+                img = Image.open(f).convert("RGB")
+                images.append({"image": img, "label": label, "path": str(f)})
+            except:
+                continue
+        return images
 
-    if 'user_images' not in st.session_state:
-        st.session_state.user_images = {'real': [], 'fake': []}
+    real_images = load_images_from_folder("real", "Real")
+    fake_images = load_images_from_folder("fake", "Fake")
+    combined = real_images + fake_images
+    quiz_images = random.sample(combined, min(10, len(combined)))
 
-    st.markdown("#### 📁 이미지 ZIP 업로드 (폴더 구조: `real/`, `fake/`)")
-    zip_file = st.file_uploader("이미지 ZIP 파일을 업로드하세요.", type=["zip"], key="zip_uploader")
-    zip_ok = True
-    if zip_file and zip_ok:
-        zip_path = Path("temp_zip_upload")
-        with zipfile.ZipFile(zip_file) as zf:
-            zf.extractall(zip_path)
-
-        # `user_images` 하위 경로 설정
-        base_dir = Path(user_images.__path__[0])
-        real_dir = base_dir / "real"
-        fake_dir = base_dir / "fake"
-
-        # real, fake 폴더 초기화 (선택적)
-        real_dir.mkdir(parents=True, exist_ok=True)
-        fake_dir.mkdir(parents=True, exist_ok=True)
-
-        # 이미지 이동
-        try: 
-            for label in ["real", "fake"]:
-                uploaded_dir = zip_path / label
-                if uploaded_dir.exists():
-                    for file in uploaded_dir.glob("*.*"):
-                        if file.suffix.lower() in [".jpg", ".jpeg", ".png"]:
-                            dest = real_dir / file.name if label == "real" else fake_dir / file.name
-                            shutil.move(str(file), str(dest))
-            # 정리
-            shutil.rmtree(zip_path)
-            st.success("✅ ZIP 파일이 성공적으로 업로드되고 이미지가 분류되었습니다.")
-            zip_ok = False
-        except:
-            st.warning("❌ ZIP 파일을 업로드하지 못하였습니다.")
-
-    username = st.text_input("닉네임 입력 (랭킹용)", value="익명 사용자")
-    st.markdown("---")
-
-    user_files = []
-    for label in ["real", "fake"]:
-        for item in st.session_state.user_images[label]:
-            user_files.append({"image": item['image'], "label": label.capitalize(), "filename": item['filename']})
-
-        folder_path = Path(user_images.__path__[0]) / label
-        for file_path in folder_path.glob("*.jpg"):
-            img = Image.open(file_path).convert("RGB")
-            user_files.append({"image": img, "label": label.capitalize(), "filename": file_path.name})
-        for file_path in folder_path.glob("*.png"):
-            img = Image.open(file_path).convert("RGB")
-            user_files.append({"image": img, "label": label.capitalize(), "filename": file_path.name})
-        for file_path in folder_path.glob("*.jpeg"):
-            img = Image.open(file_path).convert("RGB")
-            user_files.append({"image": img, "label": label.capitalize(), "filename": file_path.name})
-
-    all_data = user_files
-    if not all_data:
-        st.warning("사용자 또는 폴더 내 이미지가 없습니다.")
-        return
-
-    combined = pd.DataFrame(all_data)
-    combined = combined.sample(frac=1).reset_index(drop=True)
-    total_images = len(combined)
-
-    if 'current_index' not in st.session_state:
-        st.session_state.current_index = 0
-        st.session_state.score = 0
-        st.session_state.total = 0
-        st.session_state.answer_given = False
-        st.session_state.result_button = False
-
-    idx = st.session_state.current_index
-    if idx >= total_images:
-        st.success(f"🎉 게임 종료! 최종 점수: {st.session_state.score}/{st.session_state.total}")
-        st.session_state.total_correct += st.session_state.score
-        st.session_state.total_attempt += st.session_state.total
-        st.session_state.scoreboard.append({"user": username, "score": st.session_state.score, "total": st.session_state.total})
-        if st.button("🔄 다시 시작"):
-            st.session_state.current_index = 0
-            st.session_state.score = 0
-            st.session_state.total = 0
-            st.session_state.answer_given = False
-        return
-    else:
-        row = combined.loc[idx]
-        col1, col2 = st.columns([1, 1])
+    # 유저 선택
+    selected_indices = []
+    for i, item in enumerate(quiz_images):
+        col1, col2 = st.columns([1, 5])
         with col1:
-            st.image(row['image'], width=220, caption=f"사진 {idx + 1} / {total_images}")
-
+            st.image(item["image"], width=120)
         with col2:
-            choice = st.radio("이 이미지는 어떤가요?", ["Real", "Fake"], key=idx)
-            if not st.session_state.result_button:
-                if st.button("✅ 정답 확인"):
-                    st.session_state.answer_given = True
-                    st.rerun()
-            else:
-                if st.button("➡️ 다음 문제"):
-                    st.session_state.current_index += 1
-                    st.session_state.answer_given = False
-                    st.session_state.result_button = False
-                    st.rerun()
+            if st.checkbox(f"딥페이크일 것 같아요 (이미지 {i+1})", key=f"check_{i}"):
+                selected_indices.append(i)
 
-            if st.session_state.answer_given:
-                if choice == row['label']:
-                    st.success("🎯 정답입니다!")
-                    st.session_state.score += 1
+    # 제출 버튼
+    if st.button("✅ 결과 제출"):
+        correct = 0
+        total_fake = 0
+        st.markdown("---")
+        for i, item in enumerate(quiz_images):
+            label = item["label"]
+            selected = i in selected_indices
+
+            if label == "Fake":
+                total_fake += 1
+                if selected:
+                    st.success(f"🟢 이미지 {i+1}: 딥페이크 맞춤 (정답)")
+                    correct += 1
                 else:
-                    st.error(f"❌ 오답입니다. 정답은 {row['label']}입니다.")
-                st.session_state.total += 1
-                st.session_state.result_button = True
+                    st.info(f"🔵 이미지 {i+1}: 딥페이크인데 선택 안 함 (놓침)")
+            else:
+                if selected:
+                    st.error(f"🔴 이미지 {i+1}: 실제인데 선택함 (오답)")
 
-    st.markdown("---")
-    st.metric("누적 정답률", f"{(st.session_state.total_correct / st.session_state.total_attempt * 100):.1f}%" if st.session_state.total_attempt else "0.0%")
-    st.metric("전체 정답 수", st.session_state.total_correct)
-    st.metric("전체 시도 수", st.session_state.total_attempt)
+        accuracy = (correct / total_fake * 100) if total_fake > 0 else 0.0
+        st.markdown(f"### 🎯 점수: {correct} / {total_fake} (정답률: {accuracy:.2f}%)")
 
-    st.markdown("### 🏆 랭킹")
-    if st.session_state.scoreboard:
-        df_rank = pd.DataFrame(st.session_state.scoreboard)
-        df_rank['accuracy'] = df_rank['score'] / df_rank['total'] * 100
-        df_rank = df_rank.sort_values(by=['score', 'accuracy'], ascending=False)
-        st.dataframe(df_rank[['user', 'score', 'total', 'accuracy']].rename(columns={
-            'user': '닉네임', 'score': '점수', 'total': '시도 수', 'accuracy': '정답률 (%)'
-        }))
-    else:
-        st.info("아직 랭킹 정보가 없습니다.")
+        # 랭킹 저장
+        st.markdown("---")
+        st.markdown("#### 📝 닉네임을 입력하고 랭킹에 등록하세요")
+        username = st.text_input("닉네임", max_chars=20, key="nickname_input")
+
+        if st.button("📊 랭킹에 반영"):
+            record = {"user": username or "익명", "score": correct, "total": total_fake, "accuracy": accuracy}
+            log_path = Path("score_logs.json")
+            if log_path.exists():
+                logs = json.loads(log_path.read_text())
+            else:
+                logs = []
+
+            logs.append(record)
+            logs = sorted(logs, key=lambda x: (-x["score"], -x["accuracy"]))[:10]
+            log_path.write_text(json.dumps(logs, indent=2, ensure_ascii=False))
+
+            st.markdown("### 🏆 TOP 10 랭킹")
+            df = pd.DataFrame(logs)
+            df = df.rename(columns={"user": "닉네임", "score": "정답 수", "total": "전체 Fake 수", "accuracy": "정답률 (%)"})
+            st.dataframe(df, use_container_width=True)
+
 
 # ---------------------------
 # 도움말
 # ---------------------------
 def show_tutorial():
-    st.subheader("도움말")
+    st.subheader("도움말 및 활용 가이드")
     st.markdown("""
-    이 웹앱은 학생들이 인공지능을 통해 딥페이크와 실제 이미지를 구별할 수 있도록 돕습니다.
+---
 
-    **활용 예시:**
-    - 윤리 수업: 딥페이크의 사회적 영향
-    - 정보 수업: AI 이미지 분석 체험
-    - 미디어/사회 융합 수업 등
-    """)
+### 🧭 [1] 이미지 판별 탭 활용법
+- 실제 이미지와 딥페이크 이미지를 나란히 업로드하여, AI가 어떻게 판단하는지 확인할 수 있습니다.
+- 학습자의 얼굴로 만든 딥페이크 이미지 판별에도 활용 가능합니다.
+- 결과 테이블을 통해 AI의 판단 논리를 탐색하고 오류 가능성도 토의해볼 수 있습니다.
+
+---
+
+### 🎮 [2] 딥페이크 vs 실제 구별 탭 활용법
+- 무작위로 주어지는 10장의 이미지 중, **딥페이크(Fake)** 이미지만 선택하세요.
+- AI 없이 사람이 직접 판단해보는 퀴즈형 활동으로, 시각적 직관과 윤리적 판단의 간극을 체감할 수 있습니다.
+- 결과는 정답/오답/놓침에 따라 색상으로 피드백되며, 점수는 랭킹에 반영됩니다.
+
+---
+
+### 🎯 수업에서의 활용 포인트
+- **2차시 활동**: SwapFace로 만든 이미지 → 이 웹앱으로 판별 실습
+- **토론 주제 유도 질문**
+    - “AI가 틀릴 수도 있다는 것을 체험하면서 어떤 생각이 들었나요?”
+    - “딥페이크 이미지로 잘못된 정보가 퍼졌을 때, 누구의 책임일까요?”
+- **3차시 연계 활동**: Padlet에 웹앱 사용 후기 및 생각 공유
+
+---
+
+### 📎 연계 도구 및 링크
+- [SwapFace - 딥페이크 이미지 생성 도구](https://www.swapfaces.ai/face-swap-pictures-free)
+- [Padlet 협업 게시판](https://padlet.com/kanghyejong1001/padlet-35kuanfummy3ofmo)
+
+---
+
+이 웹앱은 단순한 기술 체험을 넘어, 학생 스스로 딥페이크 기술을 **판별하고, 윤리적 책임을 숙고하는** 과정을 유도합니다.
+""")
+
 
 # ---------------------------
 # 실행
 # ---------------------------
 st.title("딥페이크 이미지 판별 AI 시스템")
-tabs = st.tabs(["이미지 판별", "딥페이크 vs 실제 구별", "도움말"])
+tabs = st.tabs(["이미지 AI 판별", "딥페이크 vs 실제 구별", "도움말"])
 with tabs[0]:
     deepfake_checker()
 with tabs[1]:
