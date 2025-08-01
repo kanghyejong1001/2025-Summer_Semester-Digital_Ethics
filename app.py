@@ -150,6 +150,7 @@ def simulation():
                 selected_indices.append(i)
 
     # 제출 버튼
+    record = 0
     if st.button("✅ 결과 제출"):
         correct = 0
         total_fake = 0
@@ -171,6 +172,7 @@ def simulation():
 
         accuracy = (correct / total_fake * 100) if total_fake > 0 else 0.0
         st.markdown(f"### 🎯 점수: {correct} / {total_fake} (정답률: {accuracy:.2f}%)")
+        record = {"user": username or "익명", "score": correct, "total": total_fake, "accuracy": accuracy}
 
         # 랭킹 저장
         st.markdown("---")
@@ -178,7 +180,6 @@ def simulation():
         username = st.text_input("닉네임", max_chars=20, key="nickname_input")
 
         if st.button("📊 랭킹에 반영"):
-            record = {"user": username or "익명", "score": correct, "total": total_fake, "accuracy": accuracy}
             log_path = Path("score_logs.json")
             if log_path.exists():
                 text = log_path.read_text().strip()
