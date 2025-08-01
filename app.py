@@ -196,6 +196,18 @@ def simulation():
             df = df.rename(columns={"user": "닉네임", "score": "정답 수", "total": "전체 Fake 수", "accuracy": "정답률 (%)"})
             st.dataframe(df, use_container_width=True)
 
+        # 랭킹 확인 버튼
+        if st.button("🏆 랭킹 확인"):
+            log_path = Path("score_logs.json")
+            if log_path.exists():
+                logs = json.loads(log_path.read_text())
+                st.markdown("### 🏆 TOP 10 랭킹")
+                df = pd.DataFrame(logs)
+                df = df.rename(columns={"user": "닉네임", "score": "정답 수", "total": "전체 Fake 수", "accuracy": "정답률 (%)"})
+                st.dataframe(df, use_container_width=True)
+            else:
+                st.info("아직 등록된 랭킹이 없습니다.")
+
 
 # ---------------------------
 # 도움말
